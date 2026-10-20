@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#b91c1c">
+  <meta name="description" content="G Bangla TV52 - ভিডিও সংবাদ, সর্বশেষ খবর ও গুরুত্বপূর্ণ আপডেট।">
+  <title>G Bangla TV52 | সর্বশেষ সংবাদ</title>
+
+  <style>
+    * { box-sizing: border-box; }
+
+    :root {
+      --red: #c1121f;
+      --dark: #172033;
+      --muted: #64748b;
+      --bg: #f3f5f8;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, "Noto Sans Bengali", sans-serif;
+      background: var(--bg);
+      color: var(--dark);
+    }
+
+    a { color: inherit; text-decoration: none; }
+
+    .topbar {
+      background: #101827;
+      color: white;
+      padding: 8px 4%;
+      font-size: 13px;
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    header {
+      background: white;
+      padding: 18px 4%;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+      border-bottom: 3px solid var(--red);
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* ---------- Logo (Google Drive image + text fallback) ---------- */
+    .logo {
+      width: 58px;
+      height: 58px;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--red);
+      color: white;
+      font-size: 27px;
+      font-weight: 900;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+
+    .logo img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+    }
+
+    .logo .fallback {
+      display: none;
+      font-size: 27px;
+      font-weight: 900;
+      color: white;
+    }
+
+    .logo.no-img .fallback { display: block; }
+
+    .brand h1 {
+      margin: 0;
+      font-size: clamp(24px, 4vw, 36px);
+      font-weight: 900;
+      color: var(--red);
+    }
+
+    .brand p {
+      margin: 5px 0 0;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    .live {
+      background: #fee2e2;
+      color: #b91c1c;
+      border-radius: 7px;
+      padding: 9px 12px;
+      font-size: 13px;
+      font-weight: bold;
+    }
+
+    nav {
+      background: var(--red);
+      color: white;
+      padding: 0 4%;
+      display: flex;
+      gap: 0;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    nav button {
+      border: 0;
+      color: white;
+      background: transparent;
+      padding: 14px 15px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    nav button:hover,
+    nav button.active {
+      background: #8f0d17;
+    }
+
+    .breaking {
+      background: white;
+      margin: 18px auto;
+      max-width: 1200px;
+      width: 92%;
+      display: flex;
+      align-items: center;
+      overflow: hidden;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
+    .breaking strong {
+      background: #111827;
+      color: white;
+      padding: 12px;
+      white-space: nowrap;
+    }
+
+    .breaking span {
+      padding: 10px 14px;
+      font-size: 14px;
+    }
+
+    main {
+      max-width: 1200px;
+      width: 92%;
+      margin: 0 auto 35px;
+    }
+
+    .section-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin: 24px 0 15px;
+    }
+
+    .section-heading h2 {
+      font-size: 22px;
+      margin: 0;
+      border-left: 5px solid var(--red);
+      padding-left: 10px;
+    }
+
+    .tools {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    input, select {
+      padding: 11px 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      background: white;
+      font: inherit;
+      min-width: 0;
+    }
+
+    #search {
+      width: min(300px, 100%);
+    }
+
+    .video-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 18px;
+    }
+
+    .news-card {
+      background: white;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 3px 12px #0f172a0a;
+      border: 1px solid #e7eaf0;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .thumb {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      background: #e2e8f0;
+      position: relative;
+      display: grid;
+      place-items: center;
+      overflow: hidden;
+    }
+
+    .thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .play {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      background: #c1121fe8;
+      color: white;
+      display: grid;
+      place-items: center;
+      font-size: 20px;
+      pointer-events: none;
+    }
+
+    .news-content {
+      padding: 15px;
+      display: flex;
+      flex-direction: column;
+      flex: 1;
+    }
+
+    .category {
+      color: var(--red);
+      font-size: 12px;
+      font-weight: bold;
+      margin-bottom: 8px;
+    }
+
+    .news-content h3 {
+      margin: 0 0 9px;
+      font-size: 18px;
+      line-height: 1.5;
+      overflow-wrap: anywhere;
+    }
+
+    .description {
+      color: #475569;
+      font-size: 14px;
+      line-height: 1.7;
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: auto;
+      padding-top: 12px;
+    }
+
+    .watch-btn {
+      display: inline-block;
+      margin-top: 13px;
+      padding: 11px;
+      background: var(--red);
+      color: white;
+      border-radius: 7px;
+      text-align: center;
+      font-weight: bold;
+    }
+
+    .message {
+      background: white;
+      padding: 25px;
+      border-radius: 10px;
+      color: var(--muted);
+      text-align: center;
+      line-height: 1.7;
+    }
+
+    .error { color: #b91c1c; }
+
+    footer {
+      background: #101827;
+      color: #cbd5e1;
+      padding: 30px 4%;
+      text-align: center;
+      line-height: 1.8;
+    }
+
+    footer strong { color: white; font-size: 22px; }
+
+    .footer-links {
+      display: flex;
+      justify-content: center;
+      flex-wrap: wrap;
+      gap: 18px;
+      margin: 14px 0;
+      font-size: 14px;
+    }
+
+    @media (max-width: 850px) {
+      .video-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
+
+    @media (max-width: 560px) {
+      .video-grid { grid-template-columns: 1fr; }
+      header { padding: 15px 4%; }
+      .logo { width: 48px; height: 48px; }
+      .logo .fallback { font-size: 23px; }
+      .breaking { align-items: stretch; }
+      .breaking strong { padding: 10px; font-size: 12px; }
+      .breaking span { font-size: 12px; }
+      .tools { width: 100%; }
+      #search { width: 100%; }
+      .tools select { flex: 1; }
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="topbar">
+  <span id="todayDate">G Bangla TV52</span>
+  <span>সত্য সংবাদ • সর্বশেষ আপডেট</span>
+</div>
+
+<header>
+  <a class="brand" href="index.html" aria-label="G Bangla TV52 Home">
+    <div class="logo" id="brandLogo">
+      <img
+        id="logoImg"
+        alt="G Bangla TV52 লোগো"
+        src="https://lh3.googleusercontent.com/d/1c1Om9el2zVdIPwS8LvqWl4zxEcBYp8ck"
+      >
+      <span class="fallback">G</span>
+    </div>
+    <div>
+      <h1>G Bangla TV52</h1>
+      <p>আপনার সংবাদ, আপনার পাশে</p>
+    </div>
+  </a>
+  <div class="live">● NEWS UPDATE</div>
+</header>
+
+<nav id="categoryNav">
+  <button class="active" data-category="সব">হোম</button>
+  <button data-category="জাতীয়">জাতীয়</button>
+  <button data-category="রাজনীতি">রাজনীতি</button>
+  <button data-category="আন্তর্জাতিক">আন্তর্জাতিক</button>
+  <button data-category="অর্থনীতি">অর্থনীতি</button>
+  <button data-category="শিক্ষা">শিক্ষা</button>
+  <button data-category="প্রযুক্তি">প্রযুক্তি</button>
+  <button data-category="খেলাধুলা">খেলাধুলা</button>
+  <button data-category="বিনোদন">বিনোদন</button>
+  <button data-category="স্থানীয়">স্থানীয়</button>
+</nav>
+
+<div class="breaking">
+  <strong>সর্বশেষ সংবাদ</strong>
+  <span>G Bangla TV52-এর সর্বশেষ প্রকাশিত ভিডিও সংবাদ এখানে দেখুন।</span>
+</div>
+
+<main>
+  <div class="section-heading">
+    <h2>সর্বশেষ ভিডিও সংবাদ</h2>
+    <div class="tools">
+      <input id="search" type="search" placeholder="সংবাদ খুঁজুন...">
+      <select id="categoryFilter" aria-label="বিভাগ নির্বাচন">
+        <option value="সব">সব বিভাগ</option>
+        <option value="জাতীয়">জাতীয়</option>
+        <option value="রাজনীতি">রাজনীতি</option>
+        <option value="আন্তর্জাতিক">আন্তর্জাতিক</option>
+        <option value="অর্থনীতি">অর্থনীতি</option>
+        <option value="শিক্ষা">শিক্ষা</option>
+        <option value="প্রযুক্তি">প্রযুক্তি</option>
+        <option value="খেলাধুলা">খেলাধুলা</option>
+        <option value="বিনোদন">বিনোদন</option>
+        <option value="স্থানীয়">স্থানীয়</option>
+        <option value="অন্যান্য">অন্যান্য</option>
+      </select>
+    </div>
+  </div>
+
+  <div id="newsGrid" class="video-grid">
+    <div class="message">সংবাদ লোড হচ্ছে...</div>
+  </div>
+</main>
+
+<footer>
+  <strong>G Bangla TV52</strong>
+  <p>দেশ ও বিশ্বের গুরুত্বপূর্ণ সংবাদ ভিডিওতে দেখুন।</p>
+  <div class="footer-links">
+    <a href="#about">আমাদের সম্পর্কে</a>
+    <a href="#terms">ব্যবহারের শর্ত</a>
+    <a href="#privacy">গোপনীয়তা নীতি</a>
+    <a href="#contact">যোগাযোগ</a>
+  </div>
+  <div id="about">G Bangla TV52 — সংবাদ ও তথ্যের জন্য একটি ভিডিও নিউজ প্ল্যাটফর্ম।</div>
+  <p id="terms">প্রকাশিত সংবাদ যাচাই করে দেখুন এবং দায়িত্বশীলভাবে শেয়ার করুন।</p>
+  <p id="privacy">ওয়েবসাইটের প্রয়োজনীয় প্রযুক্তিগত তথ্য Firebase-এ প্রক্রিয়াকৃত হতে পারে।</p>
+  <p id="contact">যোগাযোগের তথ্য শিগগিরই এখানে যোগ করা যাবে।</p>
+  <p>© <span id="year"></span> G Bangla TV52. সর্বস্বত্ব সংরক্ষিত।</p>
+</footer>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+
+<script>
+"use strict";
+
+/* ================= Logo (Google Drive with fallbacks) ================= */
+(function () {
+  var img = document.getElementById("logoImg");
+  var box = document.getElementById("brandLogo");
+  if (!img || !box) return;
+
+  var sources = [
+    "https://lh3.googleusercontent.com/d/1c1Om9el2zVdIPwS8LvqWl4zxEcBYp8ck",
+    "https://drive.google.com/thumbnail?id=1c1Om9el2zVdIPwS8LvqWl4zxEcBYp8ck&sz=w200",
+    "https://drive.google.com/uc?export=view&id=1c1Om9el2zVdIPwS8LvqWl4zxEcBYp8ck"
+  ];
+  var i = 0;
+
+  function tryNext() {
+    if (i >= sources.length) {
+      box.classList.add("no-img");
+      img.remove();
+      return;
+    }
+    img.src = sources[i++];
+  }
+
+  img.addEventListener("error", tryNext);
+  img.addEventListener("load", function () {
+    if (img.naturalWidth < 2) tryNext();
+  });
+
+  tryNext();
+})();
+
+/* ================= Firebase ================= */
+const firebaseConfig = {
+  apiKey: "AIzaSyCY0eq7__ajsUXHiz4MpiQIAVKTeww9C6E",
+  authDomain: "sanbadikrobule.firebaseapp.com",
+  projectId: "sanbadikrobule",
+  storageBucket: "sanbadikrobule.firebasestorage.app",
+  messagingSenderId: "734727123291",
+  appId: "1:734727123291:web:ce1372e1bf4fd5ce90ea7e",
+  measurementId: "G-31TEQLY4EQ"
+};
+
+firebase.initializeApp(firebaseConfig);
+const db = firebase.firestore();
+
+const grid = document.getElementById("newsGrid");
+const searchInput = document.getElementById("search");
+const categoryFilter = document.getElementById("categoryFilter");
+
+let allNews = [];
+let selectedCategory = "সব";
+
+document.getElementById("year").textContent = new Date().getFullYear();
+document.getElementById("todayDate").textContent =
+  new Date().toLocaleDateString("bn-BD", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric"
+  });
+
+function safe(value) {
+  return String(value == null ? "" : value);
+}
+
+function formatDate(value) {
+  try {
+    const date = value && typeof value.toDate === "function"
+      ? value.toDate()
+      : null;
+    return date ? date.toLocaleDateString("bn-BD") : "";
+  } catch (_) {
+    return "";
+  }
+}
+
+function videoLink(url) {
+  try {
+    const parsed = new URL(url);
+    const host = parsed.hostname.toLowerCase();
+
+    if (host === "youtu.be") {
+      const id = parsed.pathname.slice(1);
+      return id ? "https://www.youtube.com/embed/" + encodeURIComponent(id) : url;
+    }
+
+    if (host.endsWith("youtube.com")) {
+      const id = parsed.searchParams.get("v");
+      if (id) return "https://www.youtube.com/embed/" + encodeURIComponent(id);
+
+      const match = parsed.pathname.match(/^\/(shorts|embed)\/([^/]+)/);
+      if (match) return "https://www.youtube.com/embed/" + encodeURIComponent(match[2]);
+    }
+
+    if (host === "drive.google.com") {
+      const match = parsed.pathname.match(/\/file\/d\/([^/]+)/);
+      if (match) return "https://drive.google.com/file/d/" +
+        encodeURIComponent(match[1]) + "/preview";
+    }
+
+    return url;
+  } catch (_) {
+    return url;
+  }
+}
+
+function renderNews() {
+  grid.replaceChildren();
+
+  const query = searchInput.value.trim().toLowerCase();
+
+  const filtered = allNews.filter(item => {
+    const matchesCategory = selectedCategory === "সব" ||
+      item.category === selectedCategory;
+
+    const searchable = [
+      item.title,
+      item.description,
+      item.category,
+      item.location,
+      item.source
+    ].map(safe).join(" ").toLowerCase();
+
+    return matchesCategory && searchable.includes(query);
+  });
+
+  if (!filtered.length) {
+    const message = document.createElement("div");
+    message.className = "message";
+    message.style.gridColumn = "1 / -1";
+    message.textContent =
+      allNews.length === 0
+        ? "এখনো কোনো প্রকাশিত সংবাদ নেই। Admin Panel থেকে সংবাদ Publish করলে এখানে দেখা যাবে।"
+        : "এই অনুসন্ধানে কোনো সংবাদ পাওয়া যায়নি।";
+    grid.appendChild(message);
+    return;
+  }
+
+  filtered.forEach(item => {
+    const card = document.createElement("article");
+    card.className = "news-card";
+
+    const thumb = document.createElement("div");
+    thumb.className = "thumb";
+
+    if (item.thumbnailUrl) {
+      const img = document.createElement("img");
+      img.src = item.thumbnailUrl;
+      img.alt = safe(item.title);
+      img.loading = "lazy";
+      img.onerror = () => {
+        img.remove();
+        thumb.insertAdjacentText("afterbegin", "G Bangla TV52");
+      };
+      thumb.appendChild(img);
+    } else {
+      thumb.textContent = "G Bangla TV52";
+    }
+
+    const play = document.createElement("span");
+    play.className = "play";
+    play.textContent = "▶";
+    thumb.appendChild(play);
+
+    const content = document.createElement("div");
+    content.className = "news-content";
+
+    const category = document.createElement("div");
+    category.className = "category";
+    category.textContent = safe(item.category || "সংবাদ");
+
+    const title = document.createElement("h3");
+    title.textContent = safe(item.title || "শিরোনাম নেই");
+
+    const description = document.createElement("div");
+    description.className = "description";
+    const fullDescription = safe(item.description);
+    description.textContent = fullDescription.length > 180
+      ? fullDescription.slice(0, 180) + "…"
+      : fullDescription;
+
+    const meta = document.createElement("div");
+    meta.className = "meta";
+    meta.textContent = [
+      item.location ? "স্থান: " + item.location : "",
+      formatDate(item.createdAt),
+      "Views: " + safe(item.views || 0)
+    ].filter(Boolean).join(" · ");
+
+    const watch = document.createElement("a");
+    watch.className = "watch-btn";
+    watch.href = videoLink(safe(item.videoUrl));
+    watch.target = "_blank";
+    watch.rel = "noopener noreferrer";
+    watch.textContent = "▶ ভিডিও দেখুন";
+
+    content.append(category, title, description, meta, watch);
+    card.append(thumb, content);
+    grid.appendChild(card);
+  });
+}
+
+searchInput.addEventListener("input", renderNews);
+categoryFilter.addEventListener("change", () => {
+  selectedCategory = categoryFilter.value;
+  renderNews();
+});
+
+document.getElementById("categoryNav").addEventListener("click", event => {
+  const button = event.target.closest("button[data-category]");
+  if (!button) return;
+
+  selectedCategory = button.dataset.category;
+  categoryFilter.value = selectedCategory;
+
+  document.querySelectorAll("#categoryNav button").forEach(btn => {
+    btn.classList.toggle("active", btn === button);
+  });
+
+  renderNews();
+  window.scrollTo({ top: 0, behavior: "smooth" });
+});
+
+db.collection("videos")
+  .where("published", "==", true)
+  .onSnapshot(snapshot => {
+    allNews = snapshot.docs.map(doc => ({
+      id: doc.id,
+      ...doc.data()
+    }));
+
+    allNews.sort((a, b) => {
+      const dateA = a.createdAt && a.createdAt.toMillis
+        ? a.createdAt.toMillis() : 0;
+      const dateB = b.createdAt && b.createdAt.toMillis
+        ? b.createdAt.toMillis() : 0;
+      return dateB - dateA;
+    });
+
+    renderNews();
+  }, error => {
+    grid.replaceChildren();
+    const message = document.createElement("div");
+    message.className = "message error";
+    message.style.gridColumn = "1 / -1";
+    message.textContent =
+      "সংবাদ লোড করা যায়নি। Firestore Database ও Rules পরীক্ষা করুন। " +
+      error.message;
+    grid.appendChild(message);
+  });
+</script>
+
+</body>
+</html>
