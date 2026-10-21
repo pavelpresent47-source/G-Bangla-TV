@@ -54,7 +54,6 @@
       gap: 12px;
     }
 
-    /* ---------- Logo (Google Drive image + text fallback) ---------- */
     .logo {
       width: 58px;
       height: 58px;
@@ -222,6 +221,7 @@
       display: grid;
       place-items: center;
       overflow: hidden;
+      cursor: pointer;
     }
 
     .thumb img {
@@ -288,7 +288,13 @@
       border-radius: 7px;
       text-align: center;
       font-weight: bold;
+      border: 0;
+      font: inherit;
+      cursor: pointer;
+      width: 100%;
     }
+
+    .watch-btn:hover { background: #8f0d17; }
 
     .message {
       background: white;
@@ -300,6 +306,67 @@
     }
 
     .error { color: #b91c1c; }
+
+    /* ---------- Video Modal ---------- */
+    .video-modal {
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.92);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      padding: 16px;
+    }
+
+    .video-modal.open { display: flex; }
+
+    .video-modal-inner {
+      width: min(960px, 100%);
+      background: #000;
+      border-radius: 12px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .video-modal-inner iframe {
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      border: 0;
+      display: block;
+      background: #000;
+    }
+
+    .video-modal-title {
+      color: #fff;
+      font-size: 14px;
+      padding: 10px 46px 10px 14px;
+      background: #0f172a;
+      margin: 0;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .video-modal-close {
+      position: absolute;
+      top: 6px;
+      right: 8px;
+      background: #c1121f;
+      color: #fff;
+      border: 0;
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      font-size: 20px;
+      font-weight: bold;
+      line-height: 1;
+      cursor: pointer;
+      display: grid;
+      place-items: center;
+    }
+
+    .video-modal-close:hover { background: #8f0d17; }
 
     footer {
       background: #101827;
@@ -408,6 +475,22 @@
   </div>
 </main>
 
+<!-- ================= Video Modal ================= -->
+<div class="video-modal" id="videoModal" role="dialog" aria-modal="true" aria-label="ভিডিও প্লেয়ার">
+  <div class="video-modal-inner">
+    <button class="video-modal-close" id="videoClose" aria-label="বন্ধ করুন">×</button>
+    <p class="video-modal-title" id="videoTitle"></p>
+    <iframe
+      id="videoFrame"
+      src=""
+      title="ভিডিও প্লেয়ার"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"
+      allowfullscreen
+      referrerpolicy="no-referrer-when-downgrade"
+    ></iframe>
+  </div>
+</div>
+
 <footer>
   <strong>G Bangla TV52</strong>
   <p>দেশ ও বিশ্বের গুরুত্বপূর্ণ সংবাদ ভিডিওতে দেখুন।</p>
@@ -478,6 +561,11 @@ const grid = document.getElementById("newsGrid");
 const searchInput = document.getElementById("search");
 const categoryFilter = document.getElementById("categoryFilter");
 
+const videoModal = document.getElementById("videoModal");
+const videoFrame = document.getElementById("videoFrame");
+const videoTitle = document.getElementById("videoTitle");
+const videoClose = document.getElementById("videoClose");
+
 let allNews = [];
 let selectedCategory = "সব";
 
@@ -505,36 +593,81 @@ function formatDate(value) {
   }
 }
 
-function videoLink(url) {
+/* ---------- YouTube / Drive link → embed URL ---------- */
+function videoEmbedLink(url) {
   try {
     const parsed = new URL(url);
     const host = parsed.hostname.toLowerCase();
 
+    // youtu.be/ID
     if (host === "youtu.be") {
-      const id = parsed.pathname.slice(1);
-      return id ? "https://www.youtube.com/embed/" + encodeURIComponent(id) : url;
+      const id = parsed.pathname.slice(1).split("/")[0];
+      return id
+        ? "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&rel=0"
+        : url;
     }
 
+    // youtube.com/watch?v=ID  |  /shorts/ID  |  /embed/ID
     if (host.endsWith("youtube.com")) {
       const id = parsed.searchParams.get("v");
-      if (id) return "https://www.youtube.com/embed/" + encodeURIComponent(id);
-
-      const match = parsed.pathname.match(/^\/(shorts|embed)\/([^/]+)/);
-      if (match) return "https://www.youtube.com/embed/" + encodeURIComponent(match[2]);
+      if (id) {
+        return "https://www.youtube.com/embed/" + encodeURIComponent(id) + "?autoplay=1&rel=0";
+      }
+      const m = parsed.pathname.match(/^\/(shorts|embed)\/([^/?#]+)/);
+      if (m) {
+        return "https://www.youtube.com/embed/" + encodeURIComponent(m[2]) + "?autoplay=1&rel=0";
+      }
     }
 
+    // Drive file
     if (host === "drive.google.com") {
-      const match = parsed.pathname.match(/\/file\/d\/([^/]+)/);
-      if (match) return "https://drive.google.com/file/d/" +
-        encodeURIComponent(match[1]) + "/preview";
+      let id = "";
+      const m1 = parsed.pathname.match(/\/file\/d\/([^/?#]+)/);
+      if (m1) id = m1[1];
+      if (!id) {
+        const q = parsed.searchParams.get("id");
+        if (q) id = q;
+      }
+      if (id) {
+        return "https://drive.google.com/file/d/" + encodeURIComponent(id) + "/preview";
+      }
     }
 
+    // Other direct embed (facebook, vimeo, etc.) — try as-is
     return url;
   } catch (_) {
     return url;
   }
 }
 
+/* ---------- Modal open/close ---------- */
+function openVideo(url, title) {
+  if (!url) return;
+  videoFrame.src = videoEmbedLink(url);
+  videoTitle.textContent = safe(title || "ভিডিও");
+  videoModal.classList.add("open");
+  document.body.style.overflow = "hidden";
+}
+
+function closeVideo() {
+  videoModal.classList.remove("open");
+  videoFrame.src = ""; // stop playback
+  document.body.style.overflow = "";
+}
+
+videoClose.addEventListener("click", closeVideo);
+
+videoModal.addEventListener("click", (e) => {
+  if (e.target === videoModal) closeVideo();
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape" && videoModal.classList.contains("open")) {
+    closeVideo();
+  }
+});
+
+/* ---------- Render news cards ---------- */
 function renderNews() {
   grid.replaceChildren();
 
@@ -573,6 +706,7 @@ function renderNews() {
 
     const thumb = document.createElement("div");
     thumb.className = "thumb";
+    thumb.addEventListener("click", () => openVideo(item.videoUrl, item.title));
 
     if (item.thumbnailUrl) {
       const img = document.createElement("img");
@@ -618,12 +752,11 @@ function renderNews() {
       "Views: " + safe(item.views || 0)
     ].filter(Boolean).join(" · ");
 
-    const watch = document.createElement("a");
+    const watch = document.createElement("button");
+    watch.type = "button";
     watch.className = "watch-btn";
-    watch.href = videoLink(safe(item.videoUrl));
-    watch.target = "_blank";
-    watch.rel = "noopener noreferrer";
     watch.textContent = "▶ ভিডিও দেখুন";
+    watch.addEventListener("click", () => openVideo(item.videoUrl, item.title));
 
     content.append(category, title, description, meta, watch);
     card.append(thumb, content);
